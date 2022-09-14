@@ -1,0 +1,22 @@
+def tratamentoCompromisso(dia,descricao,horario):
+    try:
+        diaSemana = int(difDayWeek(dia))
+
+    except Exception:
+        diaSemana = None
+
+    if diaSemana:
+        if '/' not in dia:
+            dia = int(getDia()) + diaSemana
+
+        if dia<10:
+            dia = '0' + str(dia)
+
+        return str(dia),descricao,tratamentoHora(horario)
+
+    else:
+        try:
+            dia = tratamentoDia(dia)
+            return str(dia), descricao, tratamentoHora(horario)
+        except Exception:
+            return False, False, False
