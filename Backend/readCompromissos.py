@@ -1,7 +1,8 @@
-from Backend.dicionario import criarDicionario
-from Backend.Data_e_hora import getData,getHora,getDia,getAno,getMes
+from dicionario import criarDicionario
+from Data_e_hora import getData,getHora,getDia,getAno,getMes
+import sqlite3
 
-class agenda:
+class agenda: ## Passar para banco de dados
 
     def __init__(self):
         file = open("Backend/compromissos.ini", "r")
@@ -218,3 +219,69 @@ class agenda:
 
             except Exception:
                 return False
+
+def transform(listWithTuple:tuple)->list:
+    return [tupla[0] for tupla in listWithTuple]
+
+class Banco_de_Dados:
+    def __init__(self,nome:str):
+        self.nome = nome
+        self.conn = sqlite3.connect(f"{nome}.db")
+        self.cmd = self.conn.cursor()
+        self.__criar()
+
+
+    def __criar(self):
+        self.cmd.execute(
+            """
+            CREATE TABLE IF NOT EXISTS compromisso (
+                    descricao varchar(100) not null,
+                    data datetime,
+                    hora varchar(6) not null
+                );
+            """
+        )
+        self.conn.commit()
+        
+
+    def inserirCompromisso(self,descricao:str,data:str,hora:str): ## Criar uma regra de negócio para inserir o compromisso
+        try:
+            self.cmd.execute(
+                f"""
+                    INSERT INTO compromisso(descricao,data,hora)
+                    values(?,?,?);
+                """,(descricao,data,hora,)
+            )
+            self.conn.commit()
+            return True
+        except Exception:
+            return False
+
+    
+    def removerCompromisso(self,data:str,hora:str):
+        try:
+            self.cmd.execute(
+                """
+                    delete from compromisso where data = ? and hora = ?;
+                """,(data,hora,)
+            )
+            self.conn.commit()
+            return True
+        except Exception:
+            return False
+    
+    def obterCompromissos(self,data:str):
+        return self.cmd.execute(
+            """
+                SELECT descricao,hora from compromisso where data = ?;
+            """,(data,)
+        ).fetchall()
+
+
+teste = Banco_de_Dados("Teste")
+teste.inserirCompromisso("Comer carne","18/12/2000","10:15")
+teste.inserirCompromisso("Comer doce","18/12/2000","10:16")
+teste.inserirCompromisso("Andar","18/12/2000","10:17")
+teste.inserirCompromisso("Nascer","18/12/2000","10:18")
+teste.inserirCompromisso("Sentar","18/12/2000","10:19")
+print(teste.obterCompromissos("18/12/2000"))

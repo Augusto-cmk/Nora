@@ -1,6 +1,6 @@
 class calculadora:
 
-    def tratarPergunta(self,pergunta):
+    def tratarPergunta(self,pergunta:str):
         pergunta = pergunta.lower()
         pergunta = pergunta.replace("%"," %")
         pergunta = pergunta.replace("de ","")

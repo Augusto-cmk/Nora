@@ -1,7 +1,4 @@
-# from chatterbot.trainers import ListTrainer
-# from chatterbot import ChatBot
 import sys
-
 from Backend.conexao import test_conexao
 from Backend.FalarOuvir import Comunication
 from Backend.Data_e_hora import getData,getHora,getMes,getAno,getDia
@@ -18,33 +15,17 @@ if test_conexao():
 # download('en_core_web_sm')
 
 
-# conversa = [
-#     'oi',
-#     'olá','tudo bem?','melhor impossível','quem é você?','eu sou a Nora, assistente do meu criador',
-#     'quem é seu criador ?','meu criador é o famigerado Pedro Maia'
-# ]
-
-# trainer = ListTrainer(chatbot)
-# trainer.train(conversa)
-# while True:
-#     pergunta = Ouvir()
-#     resposta = chatbot.get_response(pergunta)
-#     Falar(resposta)
-
-
 class ENGSM:
     ISO_639_1 = 'en_core_web_sm'
 
 
 class Nora:
     def __init__(self):
-        # self.bot = ChatBot('Nora',tagger_lenguage=ENGSM)
         self.comunicacao = Comunication()
-        # self.trainer = ListTrainer(self.bot)
         self.calcular = calculadora()
         self.perguntasPesquisa = ['o que é','qual é','quem é','o que significa','como fazer','quem foi']
         self.agenda = agenda()
-        self.comunicacao.Falar("Sistemas iniciados! Estou pronta para te ajudar")
+        self.comunicacao.Falar("Olá, sistemas iniciados!")
         self.listaCompromissos = self.getCompromissoDoDia()
         print("Nora it's runing...")
 
@@ -80,15 +61,6 @@ class Nora:
             self.activate()
 
     def comandos(self,texto):
-        # if texto[:23].lower() == 'adicionar resposta para':
-        #     pergunta = texto[23:]
-        #     if pergunta == ' ' or pergunta == '':
-        #         self.comunicacao.Falar("Esta pergunta ou frase não constitui um comando válido")
-        #     else:
-        #         resposta = self.comunicacao.addResposta(pergunta)
-        #         self.trainer.train([pergunta,resposta])
-        #         self.comunicacao.Falar(f'Agora quando você disser {pergunta} eu vou dizer {resposta}')
-
         if texto[:29].lower() == 'finalizar compromissos do dia':
             self.listaCompromissos = list()
             try:
@@ -215,20 +187,7 @@ class Nora:
                 dia = '0' + str(dia)
 
             self.lerCompromissos(str(dia))
-
-        # elif texto[:15].lower() == 'conversa comigo':
-        #     self.comunicacao.Falar("Lembre-se que você deve falar o comando finalizar conversa para encerrar")
-        #     self.comunicacao.Falar("Caso o comando seja entendido, você vai ouvir minha opinião sobre a nossa conversa!")
-        #     self.comunicacao.Falar("Além disso, você deve esperar uns 2 segundos após a minha resposta para que eu compreenda o que você disse")
-        #     self.comunicacao.Falar("Vamos começar")
-        #     self.comunicacao.Falar("Como você está?")
-        #     while True:
-        #         texto = self.comunicacao.conversa()
-        #         if texto == 'finalizar conversa':
-        #             self.comunicacao.Falar("Foi muito bom conversar com você!")
-        #             break
-        #         self.comunicacao.Falar(self.bot.get_response(texto))
-        #
+            
         else:
             self.comunicacao.Falar("Comando não existente")
             self.comunicacao.Falar("Caso queira consultar os comandos diga : o que você pode fazer")
