@@ -1,25 +1,19 @@
-from dicionario import criarDicionario
-from Data_e_hora import getData,getHora,getDia,getAno,getMes
+from Backend.Data_e_hora import getData,getHora,getDia,getAno,getMes
 import sqlite3
 
-class agenda: ## Passar para banco de dados
+class agenda:
 
     def __init__(self):
-        file = open("Backend/compromissos.ini", "r")
-        self.leitura = file.readlines()
-        self.dic = self.read()
-        file.close()
-
-
-    def write(self):
-        file = open("Backend/compromissos.ini", "w")
-        for value in self.dic:
-            file.write(f"[{value}]\n")
-            for compromisso in self.dic[value]:
-                file.write(f"{compromisso}\n")
+        self.db = Banco_de_Dados("Compromissos")
 
     def alterarCompromisso(self,data,novoDado,horario):
-        self.dic[data] = novoDado + ' ' + horario
+        self.db.alterarCompromisso(data,horario,novoDado)
+    
+    def alterarData(self,data,novaData,horario):
+        self.db.alterarData(data,horario,novaData)
+
+    def alterarHora(self,data,novaHora,horario):
+        self.db.alterarHora(data,horario,novaHora)
 
     def adicionarCompromisso(self,compromisso,hora,data=None):
         if data:
@@ -30,43 +24,41 @@ class agenda: ## Passar para banco de dados
                 data = data + f'/{getAno()}'
 
             try:
-                if self.verifyHour(data,hora):
-                    self.dic[data].append(compromisso + " " + hora)
+                if self.__verifyHour(data,hora):
+                    self.db.inserirCompromisso(compromisso,data,hora)
                     return True
                 return False
 
             except Exception:
                 if self.compareHour(hora,data):
-                    self.dic[data] = list()
-                    self.dic[data].append(compromisso + " "+ hora)
+                    self.db.inserirCompromisso(compromisso,data,hora)
                     return True
                 else:
                     return False
         else:
             try:
-                if self.verifyHour(getData(),hora):
-                    self.dic[getData()].append(compromisso + " " + hora)
+                if self.__verifyHour(getData(),hora):
+                    self.db.inserirCompromisso(compromisso,getData(),hora)
                     return True
                 return False
 
             except Exception:
                 if self.compareHour(hora,getData()):
-                    self.dic[getData()] = list()
-                    self.dic[getData()].append(compromisso + " " + hora)
+                    self.db.inserirCompromisso(compromisso,getData(),hora)
                     return True
                 else:
                     return False
 
-    def verifyHour(self,data,horario):
+    def __verifyHour(self,data,horario):
         if data == getData():
-            compromissos = self.dic[data]
+            compromissos = self.db.obterCompromissos(data)
             for compromisso in compromissos:
                 if horario in compromisso:
                     return False
 
             return self.compareHour(horario,data)
         else:
-            compromissos = self.dic[data]
+            compromissos = self.db.obterCompromissos(data)
             for compromisso in compromissos:
                 if horario in compromisso:
                     return False
@@ -110,34 +102,6 @@ class agenda: ## Passar para banco de dados
         else:
             return True
 
-
-    def read(self):
-        i = 0
-        indices = list()
-        respostas = list()
-        compromissos = list()
-        comeco = True
-        for line in self.leitura:
-            if '[' in line:
-                if comeco == False:
-                    respostas.append(compromissos)
-                    compromissos = list()
-                indice = line.replace("[", "")
-                indice = indice.replace("]", "")
-                indice = indice.replace("\n", "")
-                indices.append(indice)
-                comeco = False
-            else:
-                compromissos.append(line.replace("\n", ""))
-
-            i += 1
-        respostas.append(compromissos)
-        try:
-            return criarDicionario(indices,respostas)
-
-        except Exception:
-            return {}
-
     def delete(self,hour,data):
         compromissos = self.consulta(data)
         i = 0
@@ -153,69 +117,21 @@ class agenda: ## Passar para banco de dados
     def consulta(self,data):
         if len(data)<=2:
             try:
-                compromissos = self.dic[f'{data}/{getMes()}/{getAno()}']
-                compromissosOUT = list()
-                horario = None
-                for compromisso in compromissos:
-                    descricao = ''
-                    compromisso = compromisso.split(' ')
-                    i = 0
-                    for palavra in compromisso:
-                        if i < len(compromisso)-1:
-                            descricao += palavra + " "
-                        else:
-                            horario = palavra
-                        i += 1
-
-                    compromissosOUT.append((descricao,horario))
-
-                return compromissosOUT
+                return self.db.obterCompromissos(f'{data}/{getMes()}/{getAno()}')
 
             except Exception:
                 return False
 
         elif len(data)<=5:
             try:
-                compromissos = self.dic[f'{data}/{getAno()}']
-                compromissosOUT = list()
-                horario = None
-                for compromisso in compromissos:
-                    i = 0
-                    descricao = ''
-                    compromisso = compromisso.split(' ')
-                    for palavra in compromisso:
-                        if i < len(compromisso) - 1:
-                            descricao += palavra + " "
-                        else:
-                            horario = palavra
-                        i += 1
-
-                    compromissosOUT.append((descricao, horario))
-
-                return compromissosOUT
+                return self.db.obterCompromissos(f'{data}/{getAno()}')
 
             except Exception:
                 return False
 
         else:
             try:
-                compromissos = self.dic[data]
-                compromissosOUT = list()
-                horario = None
-                for compromisso in compromissos:
-                    descricao = ''
-                    compromisso = compromisso.split(' ')
-                    i = 0
-                    for palavra in compromisso:
-                        if i < len(compromisso) - 1:
-                            descricao += palavra + " "
-                        else:
-                            horario = palavra
-                        i += 1
-
-                    compromissosOUT.append((descricao, horario))
-
-                return compromissosOUT
+                return self.db.obterCompromissos(data)
 
             except Exception:
                 return False
@@ -276,12 +192,27 @@ class Banco_de_Dados:
                 SELECT descricao,hora from compromisso where data = ?;
             """,(data,)
         ).fetchall()
-
-
-teste = Banco_de_Dados("Teste")
-teste.inserirCompromisso("Comer carne","18/12/2000","10:15")
-teste.inserirCompromisso("Comer doce","18/12/2000","10:16")
-teste.inserirCompromisso("Andar","18/12/2000","10:17")
-teste.inserirCompromisso("Nascer","18/12/2000","10:18")
-teste.inserirCompromisso("Sentar","18/12/2000","10:19")
-print(teste.obterCompromissos("18/12/2000"))
+    
+    def alterarCompromisso(self,data:str,hora:str,novaDescricao:str):
+        self.cmd.execute(
+            """
+                UPDATE compromisso set descricao = ? where data = ? and hora = ?
+            """,(novaDescricao,data,hora,)
+        )
+        self.conn.commit()
+    
+    def alterarHora(self,data:str,hora:str,newHora:str):
+        self.cmd.execute(
+            """
+                UPDATE compromisso set hora = ? where hora = ? and data = ?
+            """,(newHora,hora,data,)
+        )
+        self.conn.commit()
+    
+    def alterarData(self,data:str,hora:str,newData:str):
+        self.cmd.execute(
+            """
+                UPDATE compromisso set data = ? where hora = ? and data = ?
+            """,(newData,hora,data,)
+        )
+        self.conn.commit()

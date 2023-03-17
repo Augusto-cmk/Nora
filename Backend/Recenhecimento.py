@@ -11,7 +11,7 @@ if test_conexao():
     import pywhatkit
 
 # from spacy.cli import download
-#
+
 # download('en_core_web_sm')
 
 
@@ -60,13 +60,13 @@ class Nora:
         except Exception:
             self.activate()
 
-    def comandos(self,texto):
+    def comandos(self,texto:str):
         if texto[:29].lower() == 'finalizar compromissos do dia':
             self.listaCompromissos = list()
             try:
                 del(self.agenda.dic[getData()])
                 self.comunicacao.Falar("Compromissos do dia exlcuídos com sucesso!")
-                self.agenda.write()
+
             except Exception:
                 self.comunicacao.Falar("Você não possui compromissos para excluir!")
 
@@ -84,7 +84,7 @@ class Nora:
             if aux != None:
                 self.agenda.delete(horario, getData())
                 self.comunicacao.Falar(f"Compromisso {aux} foi removido de sua agenda")
-                self.agenda.write()
+                
             else:
                 self.comunicacao.Falar("Acho que não comrpreendi o horário dito ou o compromisso não existe mais")
 
@@ -118,7 +118,7 @@ class Nora:
                 if self.agenda.adicionarCompromisso(info,hora,dia):
                     self.listaCompromissos = self.agenda.consulta(getDia())
                     self.comunicacao.Falar("Compromisso inserido com sucesso")
-                    self.agenda.write()
+                    
                 else:
                     self.comunicacao.Falar("Houve um erro ao inserir o compromisso! Tenha certeza que a data "
                                            "e o horário desejado esteja correto e o compromisso "
@@ -156,7 +156,6 @@ class Nora:
                 self.comunicacao.Falar(f"O resultado é {self.calcular.tratarPergunta(texto[8:])}")
 
         elif texto[:21].lower() == 'finalizar assistência':
-            self.agenda.write()
             self.comunicacao.Falar("Então vou dormir agora... Me acorde depois quando precisar de mim!")
             sys.exit(0)
 
